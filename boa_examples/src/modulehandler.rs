@@ -14,7 +14,7 @@ pub fn main() {
     }
 
     //Creating the execution context
-    let mut ctx = Context::new();
+    let mut ctx = Context::default();
 
     //Adding custom implementation that mimics 'require'
     ctx.register_global_function("require", 0, require).unwrap();

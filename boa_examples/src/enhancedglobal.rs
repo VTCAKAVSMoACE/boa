@@ -14,7 +14,7 @@ pub fn main() {
         }
         Ok(buffer) => {
             // We need to create a Javascript context.
-            let mut ctx = Context::new();
+            let mut ctx = Context::default();
 
             // We can register a global property
             ctx.register_global_property(
@@ -32,7 +32,7 @@ pub fn main() {
 
                 Ok(val.into())
             }) {
-                println!("Error: {}", error.display().to_string());
+                println!("Error: {}", error.display());
             };
 
             if let Err(error) = ctx.register_global_closure("add", 0, |_, args, _| {
@@ -44,12 +44,12 @@ pub fn main() {
 
                 Ok(val.into())
             }) {
-                println!("Error: {}", error.display().to_string());
+                println!("Error: {}", error.display());
             };
 
             //Loading, parsing and executing the JS code from the source file
             if let Err(error) = ctx.eval(&buffer) {
-                println!("Error: {}", error.display().to_string());
+                println!("Error: {}", error.display());
             }
         }
     }

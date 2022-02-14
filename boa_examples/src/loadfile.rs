@@ -1,6 +1,6 @@
 //! This example shows how to load a JavaScript file and execute it
 
-use boa::{exec::Executable, parse, Context};
+use boa::Context;
 use std::fs::read_to_string;
 
 pub fn main() {
@@ -9,17 +9,20 @@ pub fn main() {
     match read_to_string(js_file_path) {
         Ok(src) => {
             // Instantiate the execution context
-            let mut context = Context::new();
+            let mut context = Context::default();
 
             // Parse the source code
-            let expr = match parse(src, false) {
+            let code_block = match context
+                .parse(src)
+                .map(|statement_list| context.compile(&statement_list))
+            {
                 Ok(res) => res,
                 Err(e) => {
                     // Pretty print the error
                     eprintln!(
                         "Uncaught {}",
                         context
-                            .throw_syntax_error(e.to_string())
+                            .throw_syntax_error::<_, ()>(e.to_string())
                             .expect_err("interpreter.throw_syntax_error() did not return an error")
                             .display()
                     );
@@ -29,7 +32,7 @@ pub fn main() {
             };
 
             // Execute the JS code read from the source file
-            match expr.run(&mut context) {
+            match context.execute(code_block) {
                 Ok(v) => println!("{}", v.display()),
                 Err(e) => eprintln!("Uncaught {}", e.display()),
             }
