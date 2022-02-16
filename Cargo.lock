@@ -18,6 +18,7 @@ dependencies = [
  "gc",
  "getrandom",
  "indexmap",
+ "itertools",
  "jemallocator",
  "measureme",
  "num-bigint",

@@ -245,7 +245,7 @@ impl Context {
                 if !rhs.is_object() {
                     return self.throw_type_error(format!(
                         "right-hand side of 'in' should be an object, got {}",
-                        rhs.type_of()
+                        rhs.type_of().as_std_string_lossy()
                     ));
                 }
                 let key = lhs.to_property_key(self)?;
@@ -1056,7 +1056,10 @@ impl Context {
                 }
                 strings.reverse();
                 let s = JsString::concat_array(
-                    &strings.iter().map(JsString::as_str).collect::<Vec<&str>>(),
+                    &strings
+                        .iter()
+                        .map(JsString::as_slice)
+                        .collect::<Vec<&[u16]>>(),
                 );
                 self.vm.push(s);
             }

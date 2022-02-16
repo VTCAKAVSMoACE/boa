@@ -13,11 +13,13 @@
 use crate::{
     builtins::BuiltIn,
     context::StandardObjects,
+    js_string,
     object::{
         internal_methods::get_prototype_from_constructor, ConstructorBuilder, JsObject, ObjectData,
     },
     profiler::BoaProfiler,
     property::Attribute,
+    string::utf16,
     Context, JsResult, JsValue,
 };
 
@@ -111,22 +113,18 @@ impl Error {
         if !this.is_object() {
             return context.throw_type_error("'this' is not an Object");
         }
-        let name = this.get_field("name", context)?;
-        let name_to_string;
+        let name = this.get_field(js_string!("name"), context)?;
         let name = if name.is_undefined() {
-            "Error"
+            js_string!("Error")
         } else {
-            name_to_string = name.to_string(context)?;
-            name_to_string.as_str()
+            name.to_string(context)?
         };
 
-        let message = this.get_field("message", context)?;
-        let message_to_string;
+        let message = this.get_field(js_string!("message"), context)?;
         let message = if message.is_undefined() {
-            ""
+            js_string!()
         } else {
-            message_to_string = message.to_string(context)?;
-            message_to_string.as_str()
+            message.to_string(context)?
         };
 
         if name.is_empty() {
@@ -134,7 +132,7 @@ impl Error {
         } else if message.is_empty() {
             Ok(name.into())
         } else {
-            Ok(format!("{name}: {message}").into())
+            Ok(js_string!(&name, utf16!(": "), &message).into())
         }
     }
 }

@@ -15,7 +15,7 @@ use crate::{
     realm::Realm,
     syntax::{ast::node::StatementList, parser::ParseError, Parser},
     vm::{CallFrame, CodeBlock, FinallyReturn, Vm},
-    BoaProfiler, Interner, JsResult, JsValue,
+    BoaProfiler, Interner, JsResult, JsString, JsValue,
 };
 
 #[cfg(feature = "console")]
@@ -521,7 +521,7 @@ impl Context {
     #[inline]
     pub fn construct_error<M>(&mut self, message: M) -> JsValue
     where
-        M: Into<Box<str>>,
+        M: Into<JsString>,
     {
         crate::builtins::error::Error::constructor(
             &self.standard_objects().error_object().constructor().into(),
@@ -535,7 +535,7 @@ impl Context {
     #[inline]
     pub fn throw_error<M, R>(&mut self, message: M) -> JsResult<R>
     where
-        M: Into<Box<str>>,
+        M: Into<JsString>,
     {
         Err(self.construct_error(message))
     }
@@ -544,7 +544,7 @@ impl Context {
     #[inline]
     pub fn construct_range_error<M>(&mut self, message: M) -> JsValue
     where
-        M: Into<Box<str>>,
+        M: Into<JsString>,
     {
         crate::builtins::error::RangeError::constructor(
             &self
@@ -562,7 +562,7 @@ impl Context {
     #[inline]
     pub fn throw_range_error<M, R>(&mut self, message: M) -> JsResult<R>
     where
-        M: Into<Box<str>>,
+        M: Into<JsString>,
     {
         Err(self.construct_range_error(message))
     }
@@ -571,7 +571,7 @@ impl Context {
     #[inline]
     pub fn construct_type_error<M>(&mut self, message: M) -> JsValue
     where
-        M: Into<Box<str>>,
+        M: Into<JsString>,
     {
         crate::builtins::error::TypeError::constructor(
             &self
@@ -589,7 +589,7 @@ impl Context {
     #[inline]
     pub fn throw_type_error<M, R>(&mut self, message: M) -> JsResult<R>
     where
-        M: Into<Box<str>>,
+        M: Into<JsString>,
     {
         Err(self.construct_type_error(message))
     }
@@ -598,7 +598,7 @@ impl Context {
     #[inline]
     pub fn construct_reference_error<M>(&mut self, message: M) -> JsValue
     where
-        M: Into<Box<str>>,
+        M: Into<JsString>,
     {
         crate::builtins::error::ReferenceError::constructor(
             &self
@@ -616,7 +616,7 @@ impl Context {
     #[inline]
     pub fn throw_reference_error<M, R>(&mut self, message: M) -> JsResult<R>
     where
-        M: Into<Box<str>>,
+        M: Into<JsString>,
     {
         Err(self.construct_reference_error(message))
     }
@@ -625,7 +625,7 @@ impl Context {
     #[inline]
     pub fn construct_syntax_error<M>(&mut self, message: M) -> JsValue
     where
-        M: Into<Box<str>>,
+        M: Into<JsString>,
     {
         crate::builtins::error::SyntaxError::constructor(
             &self
@@ -643,7 +643,7 @@ impl Context {
     #[inline]
     pub fn throw_syntax_error<M, R>(&mut self, message: M) -> JsResult<R>
     where
-        M: Into<Box<str>>,
+        M: Into<JsString>,
     {
         Err(self.construct_syntax_error(message))
     }
@@ -651,7 +651,7 @@ impl Context {
     /// Constructs a `EvalError` with the specified message.
     pub fn construct_eval_error<M>(&mut self, message: M) -> JsValue
     where
-        M: Into<Box<str>>,
+        M: Into<JsString>,
     {
         crate::builtins::error::EvalError::constructor(
             &self
@@ -668,7 +668,7 @@ impl Context {
     /// Constructs a `URIError` with the specified message.
     pub fn construct_uri_error<M>(&mut self, message: M) -> JsValue
     where
-        M: Into<Box<str>>,
+        M: Into<JsString>,
     {
         crate::builtins::error::UriError::constructor(
             &self
@@ -685,7 +685,7 @@ impl Context {
     /// Throws a `EvalError` with the specified message.
     pub fn throw_eval_error<M, R>(&mut self, message: M) -> JsResult<R>
     where
-        M: Into<Box<str>>,
+        M: Into<JsString>,
     {
         Err(self.construct_eval_error(message))
     }
@@ -693,7 +693,7 @@ impl Context {
     /// Throws a `URIError` with the specified message.
     pub fn throw_uri_error<M>(&mut self, message: M) -> JsResult<JsValue>
     where
-        M: Into<Box<str>>,
+        M: Into<JsString>,
     {
         Err(self.construct_uri_error(message))
     }
