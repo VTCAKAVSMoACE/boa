@@ -34,7 +34,7 @@ use std::{
 ///# use boa::symbol::WellKnownSymbols;
 ///
 /// let iterator = WellKnownSymbols::iterator();
-/// assert_eq!(iterator.description().as_deref(), Some("Symbol.iterator"));
+/// assert_eq!(iterator.description().unwrap().as_std_string_lossy(), "Symbol.iterator");
 /// ```
 /// This is equivalent to `let iterator = Symbol.iterator` in JavaScript.
 #[derive(Debug, Clone)]
