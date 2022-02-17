@@ -7,11 +7,12 @@
 
 use super::global_environment_record::GlobalEnvironmentRecord;
 use crate::{
-    environment::environment_record_trait::EnvironmentRecordTrait, object::JsObject, Profiler,
-    Context, JsResult, JsValue,
+    environment::environment_record_trait::EnvironmentRecordTrait, object::JsObject, Context,
+    JsResult, JsValue,
 };
 use boa_gc::Gc;
 use boa_interner::Sym;
+use boa_profiler::Profiler;
 use std::{collections::VecDeque, error, fmt};
 
 /// Environments are wrapped in a Box and then in a GC wrapper
@@ -156,8 +157,7 @@ impl Context {
     }
 
     pub(crate) fn get_binding_value(&mut self, name: Sym) -> JsResult<JsValue> {
-        let _timer =
-            Profiler::global().start_event("LexicalEnvironment::get_binding_value", "env");
+        let _timer = Profiler::global().start_event("LexicalEnvironment::get_binding_value", "env");
         self.get_current_environment()
             .recursive_get_binding_value(name, self)
     }

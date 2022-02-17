@@ -13,17 +13,18 @@
 //! [spec]: https://tc39.es/ecma262/#sec-number-object
 //! [mdn]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number
 
-use super::string::is_trimmable_whitespace;
-use super::JsArgs;
-use crate::context::StandardObjects;
-use crate::object::JsObject;
+use super::{string::is_trimmable_whitespace, JsArgs};
 use crate::{
     builtins::{function::make_builtin_fn, BuiltIn},
-    object::{internal_methods::get_prototype_from_constructor, ConstructorBuilder, ObjectData},
+    context::StandardObjects,
+    object::{
+        internal_methods::get_prototype_from_constructor, ConstructorBuilder, JsObject, ObjectData,
+    },
     property::Attribute,
     value::{AbstractRelation, IntegerOrInfinity, JsValue},
-    Profiler, Context, JsResult,
+    Context, JsResult,
 };
+use boa_profiler::Profiler;
 use num_traits::{float::FloatCore, Num};
 
 mod conversions;

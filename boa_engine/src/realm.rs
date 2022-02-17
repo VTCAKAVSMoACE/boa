@@ -9,9 +9,9 @@ use crate::{
         global_environment_record::GlobalEnvironmentRecord, lexical_environment::LexicalEnvironment,
     },
     object::{JsObject, ObjectData},
-    Profiler,
 };
 use boa_gc::Gc;
+use boa_profiler::Profiler;
 
 /// Representation of a Realm.
 ///

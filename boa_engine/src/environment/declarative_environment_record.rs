@@ -11,10 +11,11 @@ use crate::{
         lexical_environment::{Environment, EnvironmentType},
     },
     object::JsObject,
-    Profiler, Context, JsResult, JsValue,
+    Context, JsResult, JsValue,
 };
 use boa_gc::{self, Finalize, Gc, Trace};
 use boa_interner::Sym;
+use boa_profiler::Profiler;
 use rustc_hash::FxHashMap;
 
 /// Declarative Bindings have a few properties for book keeping purposes, such as mutability (const vs let).
