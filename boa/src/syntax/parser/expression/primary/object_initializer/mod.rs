@@ -12,7 +12,10 @@ mod tests;
 use crate::{
     syntax::{
         ast::{
-            node::{self, FunctionExpr, Identifier, MethodDefinitionKind, Node, Object},
+            node::{
+                self, AsyncFunctionExpr, AsyncGeneratorExpr, FormalParameterList, FunctionExpr,
+                GeneratorExpr, Identifier, MethodDefinition, Node, Object,
+            },
             Keyword, Punctuator,
         },
         lexer::{Error as LexError, Position, TokenKind},
@@ -227,7 +230,7 @@ where
 
                 // Early Error: UniqueFormalParameters : FormalParameters
                 // NOTE: does not appear to formally be in ECMAScript specs for method
-                if params.has_duplicates {
+                if params.has_duplicates() {
                     return Err(ParseError::lex(LexError::Syntax(
                         "Duplicate parameter name not allowed in this context".into(),
                         params_start_position,
@@ -248,7 +251,7 @@ where
 
                 // Early Error: It is a Syntax Error if FunctionBodyContainsUseStrict of FunctionBody is true
                 // and IsSimpleParameterList of UniqueFormalParameters is false.
-                if body.strict() && !params.is_simple {
+                if body.strict() && !params.is_simple() {
                     return Err(ParseError::lex(LexError::Syntax(
                         "Illegal 'use strict' directive in function with non-simple parameter list"
                             .into(),
@@ -280,9 +283,8 @@ where
                 }
 
                 return Ok(node::PropertyDefinition::method_definition(
-                    MethodDefinitionKind::AsyncGenerator,
+                    MethodDefinition::AsyncGenerator(AsyncGeneratorExpr::new(None, params, body)),
                     property_name,
-                    FunctionExpr::new(None, params.parameters, body),
                 ));
             }
             // MethodDefinition[?Yield, ?Await] -> AsyncMethod[?Yield, ?Await]
@@ -296,7 +298,7 @@ where
 
             // Early Error: UniqueFormalParameters : FormalParameters
             // NOTE: does not appear to be in ECMAScript specs
-            if params.has_duplicates {
+            if params.has_duplicates() {
                 return Err(ParseError::lex(LexError::Syntax(
                     "Duplicate parameter name not allowed in this context".into(),
                     params_start_position,
@@ -317,7 +319,7 @@ where
 
             // Early Error: It is a Syntax Error if FunctionBodyContainsUseStrict of FunctionBody is true
             // and IsSimpleParameterList of UniqueFormalParameters is false.
-            if body.strict() && !params.is_simple {
+            if body.strict() && !params.is_simple() {
                 return Err(ParseError::lex(LexError::Syntax(
                     "Illegal 'use strict' directive in function with non-simple parameter list"
                         .into(),
@@ -348,9 +350,8 @@ where
                 }
             }
             return Ok(node::PropertyDefinition::method_definition(
-                MethodDefinitionKind::Async,
+                MethodDefinition::Async(AsyncFunctionExpr::new(None, params, body)),
                 property_name,
-                FunctionExpr::new(None, params.parameters, body),
             ));
         }
 
@@ -376,7 +377,7 @@ where
 
             // Early Error: UniqueFormalParameters : FormalParameters
             // NOTE: does not appear to be in ECMAScript specs for GeneratorMethod
-            if params.has_duplicates {
+            if params.has_duplicates() {
                 return Err(ParseError::lex(LexError::Syntax(
                     "Duplicate parameter name not allowed in this context".into(),
                     params_start_position,
@@ -397,7 +398,7 @@ where
 
             // Early Error: It is a Syntax Error if FunctionBodyContainsUseStrict of FunctionBody is true
             // and IsSimpleParameterList of UniqueFormalParameters is false.
-            if body.strict() && !params.is_simple {
+            if body.strict() && !params.is_simple() {
                 return Err(ParseError::lex(LexError::Syntax(
                     "Illegal 'use strict' directive in function with non-simple parameter list"
                         .into(),
@@ -429,9 +430,8 @@ where
             }
 
             return Ok(node::PropertyDefinition::method_definition(
-                MethodDefinitionKind::Generator,
+                MethodDefinition::Generator(GeneratorExpr::new(None, params, body)),
                 property_name,
-                FunctionExpr::new(None, params.parameters, body),
             ));
         }
 
@@ -481,9 +481,12 @@ where
                 )?;
 
                 Ok(node::PropertyDefinition::method_definition(
-                    MethodDefinitionKind::Get,
+                    MethodDefinition::Get(FunctionExpr::new(
+                        None,
+                        FormalParameterList::default(),
+                        body,
+                    )),
                     property_name,
-                    FunctionExpr::new(None, [], body),
                 ))
             }
             // MethodDefinition[?Yield, ?Await] -> set ClassElementName[?Yield, ?Await] ( PropertySetParameterList ) { FunctionBody[~Yield, ~Await] }
@@ -526,7 +529,7 @@ where
 
                 // Early Error: It is a Syntax Error if FunctionBodyContainsUseStrict of FunctionBody is true
                 // and IsSimpleParameterList of PropertySetParameterList is false.
-                if body.strict() && !params.is_simple {
+                if body.strict() && !params.is_simple() {
                     return Err(ParseError::lex(LexError::Syntax(
                         "Illegal 'use strict' directive in function with non-simple parameter list"
                             .into(),
@@ -535,9 +538,8 @@ where
                 }
 
                 Ok(node::PropertyDefinition::method_definition(
-                    MethodDefinitionKind::Set,
+                    MethodDefinition::Set(FunctionExpr::new(None, params, body)),
                     property_name,
-                    FunctionExpr::new(None, params.parameters, body),
                 ))
             }
             // MethodDefinition[?Yield, ?Await] -> ClassElementName[?Yield, ?Await] ( UniqueFormalParameters[~Yield, ~Await] ) { FunctionBody[~Yield, ~Await] }
@@ -558,7 +560,7 @@ where
                 )?;
 
                 // Early Error: UniqueFormalParameters : FormalParameters
-                if params.has_duplicates {
+                if params.has_duplicates() {
                     return Err(ParseError::lex(LexError::Syntax(
                         "Duplicate parameter name not allowed in this context".into(),
                         params_start_position,
@@ -579,7 +581,7 @@ where
 
                 // Early Error: It is a Syntax Error if FunctionBodyContainsUseStrict of FunctionBody is true
                 // and IsSimpleParameterList of UniqueFormalParameters is false.
-                if body.strict() && !params.is_simple {
+                if body.strict() && !params.is_simple() {
                     return Err(ParseError::lex(LexError::Syntax(
                         "Illegal 'use strict' directive in function with non-simple parameter list"
                             .into(),
@@ -588,9 +590,8 @@ where
                 }
 
                 Ok(node::PropertyDefinition::method_definition(
-                    MethodDefinitionKind::Ordinary,
+                    MethodDefinition::Ordinary(FunctionExpr::new(None, params, body)),
                     property_name,
-                    FunctionExpr::new(None, params.parameters, body),
                 ))
             }
         }

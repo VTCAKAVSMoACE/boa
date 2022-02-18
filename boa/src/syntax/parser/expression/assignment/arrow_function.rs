@@ -7,28 +7,27 @@
 //! [mdn]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions
 //! [spec]: https://tc39.es/ecma262/#sec-arrow-function-definitions
 
-use boa_interner::Sym;
-
 use super::AssignmentExpression;
 use crate::{
     syntax::{
         ast::{
             node::{
-                declaration::Declaration, ArrowFunctionDecl, FormalParameter, Node, Return,
-                StatementList,
+                declaration::Declaration, ArrowFunctionDecl, FormalParameter, FormalParameterList,
+                Node, Return, StatementList,
             },
             Punctuator,
         },
         lexer::{Error as LexError, Position, TokenKind},
         parser::{
             error::{ErrorContext, ParseError, ParseResult},
-            function::{FormalParameterList, FormalParameters, FunctionBody},
+            function::{FormalParameters, FunctionBody},
             statement::BindingIdentifier,
             AllowAwait, AllowIn, AllowYield, Cursor, TokenParser,
         },
     },
     BoaProfiler, Interner,
 };
+use boa_interner::Sym;
 
 use std::io::Read;
 
@@ -102,15 +101,19 @@ where
                 let param = BindingIdentifier::new(self.allow_yield, self.allow_await)
                     .parse(cursor, interner)
                     .context("arrow function")?;
+                let has_arguments = param == Sym::ARGUMENTS;
                 (
-                    FormalParameterList {
-                        parameters: Box::new([FormalParameter::new(
+                    FormalParameterList::new(
+                        Box::new([FormalParameter::new(
                             Declaration::new_with_identifier(param, None),
                             false,
                         )]),
-                        is_simple: true,
-                        has_duplicates: false,
-                    },
+                        true,
+                        false,
+                        false,
+                        false,
+                        has_arguments,
+                    ),
                     params_start_position,
                 )
             };
@@ -125,7 +128,7 @@ where
         let body = ConciseBody::new(self.allow_in).parse(cursor, interner)?;
 
         // Early Error: ArrowFormalParameters are UniqueFormalParameters.
-        if params.has_duplicates {
+        if params.has_duplicates() {
             return Err(ParseError::lex(LexError::Syntax(
                 "Duplicate parameter name not allowed in this context".into(),
                 params_start_position,
@@ -134,7 +137,7 @@ where
 
         // Early Error: It is a Syntax Error if ConciseBodyContainsUseStrict of ConciseBody is true
         // and IsSimpleParameterList of ArrowParameters is false.
-        if body.strict() && !params.is_simple {
+        if body.strict() && !params.is_simple() {
             return Err(ParseError::lex(LexError::Syntax(
                 "Illegal 'use strict' directive in function with non-simple parameter list".into(),
                 params_start_position,
@@ -165,7 +168,7 @@ where
             }
         }
 
-        Ok(ArrowFunctionDecl::new(self.name, params.parameters, body))
+        Ok(ArrowFunctionDecl::new(self.name, params, body))
     }
 }
 
@@ -176,7 +179,7 @@ struct ConciseBody {
 }
 
 impl ConciseBody {
-    /// Creates a new `ConcideBody` parser.
+    /// Creates a new `ConciseBody` parser.
     fn new<I>(allow_in: I) -> Self
     where
         I: Into<AllowIn>,
